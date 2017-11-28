@@ -6,4 +6,5 @@ This project is an analysis of my Spotify music tastes. The data set I will be w
 
 ## Documentation
 [SpotiPy](http://spotipy.readthedocs.org/)
+
 [Spotify](https://developer.spotify.com/web-api/get-audio-features/)
