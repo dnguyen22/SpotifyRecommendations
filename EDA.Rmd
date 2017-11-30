@@ -1,4 +1,4 @@
-TITLE by YOUR_NAME_HERE
+Spotify Analysis by Don Nguyen
 ========================================================
 
 ```{r echo=FALSE, message=FALSE, warning=FALSE, packages}
@@ -14,23 +14,43 @@ library(ggplot2)
 
 ```{r echo=FALSE, Load_the_Data}
 # Load the Data
+raw <- read.csv("spotify_data.csv", sep = '\t')
 
+drops <- c("X","analysis_url", "id", "track_href", "type", "uri")
+songs <- raw[ , !(names(raw) %in% drops)]
 ```
 
 # Univariate Plots Section
-```{r echo=FALSE, Univariate_Plots}
+```{r echo=FALSE, Univariate_Summary}
+summary(subset(songs, songs$like.=='yes'))
+summary(subset(songs, songs$like.=='no'))
+```
 
+```{r echo=FALSE, Univariate_Plots}
+ggplot(aes(x=acousticness), data = songs) + geom_histogram(bins = 30, fill = '#099DD9', color = 'black') + facet_wrap(~like.) + ggtitle("Acousticness")
+ggplot(aes(x=danceability), data = songs) + geom_histogram(bins = 30, fill = '#099DD9', color = 'black') + facet_wrap(~like.) + ggtitle("Danceability")
+ggplot(aes(x=energy), data = songs) + geom_histogram(bins = 30, fill = '#099DD9', color = 'black') + facet_wrap(~like.) + ggtitle("Energy")
+ggplot(aes(x=instrumentalness), data = songs) + geom_histogram(bins = 30, fill = '#099DD9', color = 'black') + facet_wrap(~like.) + ggtitle("Instrumentalness")
+ggplot(aes(x=liveness), data = songs) + geom_histogram(bins = 30, fill = '#099DD9', color = 'black') + facet_wrap(~like.) + ggtitle("Liveness")
+ggplot(aes(x=loudness), data = songs) + geom_histogram(bins = 30, fill = '#099DD9', color = 'black') + facet_wrap(~like.) + ggtitle("Loudness")
+ggplot(aes(x=speechiness), data = songs) + geom_histogram(bins = 30, fill = '#099DD9', color = 'black') + facet_wrap(~like.) + ggtitle("Speechiness")
+ggplot(aes(x=tempo), data = songs) + geom_histogram(bins = 30, fill = '#099DD9', color = 'black') + facet_wrap(~like.) + ggtitle("Tempo")
+ggplot(aes(x=valence), data = songs) + geom_histogram(bins = 30, fill = '#099DD9', color = 'black') + facet_wrap(~like.) + ggtitle("Valence")
 ```
 
 # Univariate Analysis
 
 ### What is the structure of your dataset?
+The dataset consists of 2000 songs, half of which are songs I categorized as liking on Spotify, the other half categorized as not liking. The songs I do not like have been pulled from many different genres of music. Each song has 14 features that can be analyzed.
 
 ### What is/are the main feature(s) of interest in your dataset?
+The main feature to be investigated is the "like" column, which represents whether or not I have liked the song on Spotify.
 
 ### What other features in the dataset do you think will help support your investigation into your feature(s) of interest?
+I will be exploring all other features of the songs as a function of "like" to find patterns in songs I do and do not enjoy.
 
 ### Did you create any new variables from existing variables in the dataset?
+Currently, none of the variables have been created based off existing variables.
 
 ### Of the features you investigated, were there any unusual distributions? Did you perform any operations on the data to tidy, adjust, or change the form of the data? If so, why did you do this?
 
