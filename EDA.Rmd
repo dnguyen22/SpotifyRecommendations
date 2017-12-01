@@ -29,6 +29,7 @@ summary(subset(songs, songs$like.=='no'))
 ```{r echo=FALSE, Univariate_Plots}
 ggplot(aes(x=acousticness), data = songs) + geom_histogram(bins = 30, fill = '#099DD9', color = 'black') + facet_wrap(~like.) + ggtitle("Acousticness")
 ggplot(aes(x=danceability), data = songs) + geom_histogram(bins = 30, fill = '#099DD9', color = 'black') + facet_wrap(~like.) + ggtitle("Danceability")
+ggplot(aes(x=duration_ms), data = songs) + geom_histogram(bins = 30, fill = '#099DD9', color = 'black') + facet_wrap(~like.) + ggtitle("Duration (ms)")
 ggplot(aes(x=energy), data = songs) + geom_histogram(bins = 30, fill = '#099DD9', color = 'black') + facet_wrap(~like.) + ggtitle("Energy")
 ggplot(aes(x=instrumentalness), data = songs) + geom_histogram(bins = 30, fill = '#099DD9', color = 'black') + facet_wrap(~like.) + ggtitle("Instrumentalness")
 ggplot(aes(x=liveness), data = songs) + geom_histogram(bins = 30, fill = '#099DD9', color = 'black') + facet_wrap(~like.) + ggtitle("Liveness")
@@ -36,6 +37,18 @@ ggplot(aes(x=loudness), data = songs) + geom_histogram(bins = 30, fill = '#099DD
 ggplot(aes(x=speechiness), data = songs) + geom_histogram(bins = 30, fill = '#099DD9', color = 'black') + facet_wrap(~like.) + ggtitle("Speechiness")
 ggplot(aes(x=tempo), data = songs) + geom_histogram(bins = 30, fill = '#099DD9', color = 'black') + facet_wrap(~like.) + ggtitle("Tempo")
 ggplot(aes(x=valence), data = songs) + geom_histogram(bins = 30, fill = '#099DD9', color = 'black') + facet_wrap(~like.) + ggtitle("Valence")
+```
+```{r echo=FALSE, Univariate_Box_Plots}
+ggplot(aes(x=like., y=acousticness), data = songs) + geom_boxplot() + ggtitle("Acousticness")
+ggplot(aes(x=like., y=danceability), data = songs) + geom_boxplot() + ggtitle("Danceability")
+ggplot(aes(x=like., y=duration_ms), data = songs) + geom_boxplot() + ggtitle("Duration (ms)")
+ggplot(aes(x=like., y=energy), data = songs) + geom_boxplot() + ggtitle("Energy")
+ggplot(aes(x=like., y=instrumentalness), data = songs) + geom_boxplot() + ggtitle("Instrumentalness")
+ggplot(aes(x=like., y=liveness), data = songs) + geom_boxplot() + ggtitle("Liveness")
+ggplot(aes(x=like., y=loudness), data = songs) + geom_boxplot() + ggtitle("Loudness")
+ggplot(aes(x=like., y=speechiness), data = songs) + geom_boxplot() + ggtitle("Speechiness")
+ggplot(aes(x=like., y=tempo), data = songs) + geom_boxplot() + ggtitle("Tempo")
+ggplot(aes(x=like., y=valence), data = songs) + geom_boxplot() + ggtitle("Valence")
 ```
 
 # Univariate Analysis
