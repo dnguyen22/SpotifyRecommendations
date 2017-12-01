@@ -8,8 +8,16 @@ Spotify Analysis by Don Nguyen
 # Notice that the parameter "echo" was set to FALSE for this code chunk.
 # This prevents the code from displaying in the knitted HTML output.
 # You should set echo=FALSE for all code chunks in your file.
-
+#install.packages('rpart')
+#install.packages('rpart.plot')
+#install.packages('rattle')
+#install.packages('randomForest')
 library(ggplot2)
+library(rattle)
+library(rpart)
+library(rpart.plot)
+library(RColorBrewer)
+library(randomForest)
 ```
 
 ```{r echo=FALSE, Load_the_Data}
@@ -50,6 +58,16 @@ ggplot(aes(x=like., y=speechiness), data = songs) + geom_boxplot() + ggtitle("Sp
 ggplot(aes(x=like., y=tempo), data = songs) + geom_boxplot() + ggtitle("Tempo")
 ggplot(aes(x=like., y=valence), data = songs) + geom_boxplot() + ggtitle("Valence")
 ```
+```{r echo=FALSE, t_Tests}
+like = subset(songs, like.=='yes')
+dislike = subset(songs, like.=='no')
+t.test(like$instrumentalness, dislike$instrumentalness,alternative="two.sided",mu=0,var.equal=F,conf.level=0.99)
+t.test(like$energy, dislike$energy,alternative="two.sided",mu=0,var.equal=F,conf.level=0.99)
+t.test(like$acousticness, dislike$acousticness,alternative="two.sided",mu=0,var.equal=F,conf.level=0.99)
+t.test(like$danceability, dislike$danceability,alternative="two.sided",mu=0,var.equal=F,conf.level=0.99)
+t.test(like$tempo, dislike$tempo,alternative="two.sided",mu=0,var.equal=F,conf.level=0.99)
+t.test(like$valence, dislike$valence,alternative="two.sided",mu=0,var.equal=F,conf.level=0.99)
+```
 
 # Univariate Analysis
 
@@ -73,7 +91,7 @@ The features that stood out to me as having the most difference between songs I 
 
 # Bivariate Plots Section
 ```{r echo=FALSE, Bivariate_Plots}
-ggplot(aes(x=loudness, y=energy), data = songs) + geom_point() + ggtitle("Relationship Between Loudness and Energy")
+ggplot(aes(x=loudness, y=energy), data = subset(songs, songs$loudness < quantile(songs$loudness, .99) & songs$loudness > quantile(songs$loudness, .01))) + geom_point() + ggtitle("Relationship Between Loudness and Energy") + geom_smooth() 
 ggplot(aes(x=loudness, y=valence), data = songs) + geom_point() + ggtitle("Relationship Between Loudness and Valence")
 ggplot(aes(x=valence, y=energy), data = songs) + geom_point() + ggtitle("Relationship Between Happy Songs and Song Energy Level")
 ggplot(aes(x=liveness, y=energy), data = songs) + geom_point() + ggtitle("Relationship Between Live Songs and Energy")
@@ -101,16 +119,58 @@ Loudness and energy has a strong, positive linear relationship. Energy may be ba
 # Multivariate Plots Section
 
 ```{r echo=FALSE, Multivariate_Plots}
+ggplot(aes(x=loudness, y=energy), data = subset(songs, songs$loudness < quantile(songs$loudness, .99) & songs$loudness > quantile(songs$loudness, .01))) + geom_point(aes(color = like.), alpha = 1/2) + ggtitle("Relationship Between Loudness and Energy") 
+ggplot(aes(x=loudness, y=valence), data = songs) + geom_point(aes(color = like.), alpha = 1/2) + ggtitle("Relationship Between Loudness and Valence")
+ggplot(aes(x=valence, y=energy), data = songs) + geom_point(aes(color = like.), alpha = 1/2) + ggtitle("Relationship Between Happy Songs and Song Energy Level")
+ggplot(aes(x=liveness, y=energy), data = songs) + geom_point(aes(color = like.), alpha = 1/2) + ggtitle("Relationship Between Live Songs and Energy")
+ggplot(aes(x=acousticness, y=danceability), data = songs) + geom_point(aes(color = like.), alpha = 1/2) + ggtitle("Danceability of Acoustic Songs")
+ggplot(aes(x=instrumentalness, y=danceability), data = songs) + geom_point(aes(color = like.), alpha = 1/2) + ggtitle("Danceability of Instrumental Songs")
+ggplot(aes(x=tempo, y = danceability), data = songs) + geom_point(aes(color = like.), alpha = 1/2) + ggtitle("Tempo vs. Danceability")
+ggplot(aes(x=acousticness, y=liveness), data = songs) + geom_point(aes(color = like.), alpha = 1/2) + ggtitle("Relationship Between Acousticness and Probaiblity of Liveness")
+```
+```{r echo=FALSE, Model_Decision_Tree}
 
+## 80% of the sample size
+smp_size <- floor(0.80 * nrow(songs))
+
+## set the seed to make your partition reproductible
+set.seed(123)
+train_ind <- sample(seq_len(nrow(songs)), size = smp_size)
+
+train <- songs[train_ind, ]
+test <- songs[-train_ind, ]
+
+fit <- rpart(like. ~ acousticness + danceability + duration_ms + energy + instrumentalness + key + liveness + loudness + speechiness + tempo + valence,
+               data=train,
+               method="class")
+
+fancyRpartPlot(fit)
+Prediction <- predict(fit, test, type = "class")
+predictions <- data.frame(test, prediction = Prediction)
+paste0(round(100*with(predictions, mean(like.==prediction))), "%")
+```
+```{r echo=FALSE, Model_Random_Forest}
+set.seed(415)
+fit_rf <- randomForest(as.factor(like.) ~ acousticness + danceability + duration_ms + energy + instrumentalness + key + liveness + loudness + speechiness + tempo + valence,
+                      data=train, 
+                      importance=TRUE, 
+                      ntree=2000)
+varImpPlot(fit_rf)
+
+Prediction_rf <- predict(fit_rf, test)
+predictions_rf <- data.frame(test, prediction = Prediction_rf)
+paste0(round(100*with(predictions_rf, mean(like.==prediction))), "%")
 ```
 
 # Multivariate Analysis
 
 ### Talk about some of the relationships you observed in this part of the investigation. Were there features that strengthened each other in terms of looking at your feature(s) of interest?
+Songs I like typically have lower energy and loudness when compared to songs I do not like. Additionally, when danceability is coupled with tempo, songs I like appear to have lower danceability than songs I do not like.
 
 ### Were there any interesting or surprising interactions between features?
+The interaction between tempo and danceability between songs I like and dislike is interesting because there was little difference when looking at danceability by itself. Only when splitting up danceability by tempo can I see the songs I like have lower danceabilty. This is because danceability and tempo have a quadratic relationship.
 
-### OPTIONAL: Did you create any models with your dataset? Discuss the strengths and limitations of your model.
+### Discuss the strengths and limitations of your model.
 
 ------
 
