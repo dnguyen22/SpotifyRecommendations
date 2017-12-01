@@ -66,22 +66,35 @@ I will be exploring all other features of the songs as a function of "like" to f
 Currently, none of the variables have been created based off existing variables.
 
 ### Of the features you investigated, were there any unusual distributions? Did you perform any operations on the data to tidy, adjust, or change the form of the data? If so, why did you do this?
+A couple data points needed to be removed prior to loading into R since they had null features. After removing the two songs, the rest of the data came tidy from Spotify. A few features were dropped due to not giving much information to analyze. 
 
+The features that stood out to me as having the most difference between songs I liked and disliked were energy, acousticness, and instrumentalness. Songs I liked tend to have lower energy, and more acousticness than songs I did not like. The songs I dislike also are clearly not instrumental, whereas songs I like have a higher probability of being instrumental.
 
 
 # Bivariate Plots Section
 ```{r echo=FALSE, Bivariate_Plots}
-
+ggplot(aes(x=loudness, y=energy), data = songs) + geom_point() + ggtitle("Relationship Between Loudness and Energy")
+ggplot(aes(x=loudness, y=valence), data = songs) + geom_point() + ggtitle("Relationship Between Loudness and Valence")
+ggplot(aes(x=valence, y=energy), data = songs) + geom_point() + ggtitle("Relationship Between Happy Songs and Song Energy Level")
+ggplot(aes(x=liveness, y=energy), data = songs) + geom_point() + ggtitle("Relationship Between Live Songs and Energy")
+ggplot(aes(x=acousticness, y=danceability), data = songs) + geom_point() + ggtitle("Danceability of Acoustic Songs")
+ggplot(aes(x=instrumentalness, y=danceability), data = songs) + geom_point() + ggtitle("Danceability of Instrumental Songs")
+ggplot(aes(x=tempo, y = danceability), data = songs) + geom_point() + ggtitle("Tempo vs. Danceability")
+ggplot(aes(x=acousticness, y=liveness), data = songs) + geom_point() + ggtitle("Relationship Between Acousticness and Probaiblity of Liveness")
+```
+```{r echo=FALSE, Bivariate_Correlations}
+with(songs, cor.test(loudness, energy))
+with(songs, cor.test(valence, energy))
+with(songs, cor.test(tempo, danceability))
 ```
 
 # Bivariate Analysis
 
 ### Talk about some of the relationships you observed in this part of the investigation. How did the feature(s) of interest vary with other features in the dataset?
-
-### Did you observe any interesting relationships between the other features (not the main feature(s) of interest)?
+There is a clear positive linear relationship between loudness and energy. There seems to be a polynomial relationship between tempo and danceability too. These relationships are not surprising. However, valence did not show a strong correlation with energy nor loudness. The other variables also did not show any strong correlations with each other.
 
 ### What was the strongest relationship you found?
-
+Loudness and energy has a strong, positive linear relationship. Energy may be based off of loudness.
 
 
 
