@@ -18,6 +18,7 @@ library(rpart)
 library(rpart.plot)
 library(RColorBrewer)
 library(randomForest)
+library(gridExtra)
 ```
 
 ```{r echo=FALSE, Load_the_Data}
@@ -171,6 +172,7 @@ Songs I like typically have lower energy and loudness when compared to songs I d
 The interaction between tempo and danceability between songs I like and dislike is interesting because there was little difference when looking at danceability by itself. Only when splitting up danceability by tempo can I see the songs I like have lower danceabilty. This is because danceability and tempo have a quadratic relationship.
 
 ### Discuss the strengths and limitations of your model.
+Random forests and decision trees have the benefit of being robust to outliers and they are able to find non-linear relationships within features. Individual trees suffer from overfitting if they are unconstrained.
 
 ------
 
@@ -178,27 +180,32 @@ The interaction between tempo and danceability between songs I like and dislike 
 
 ### Plot One
 ```{r echo=FALSE, Plot_One}
+p1 <- ggplot(aes(x=like., y=acousticness), data = songs) + geom_boxplot() + ylab("Acousticness") + xlab("Preferred?")
+p2 <- ggplot(aes(x=like., y=energy), data = songs) + geom_boxplot() + ylab("Energy") + xlab("Preferred?")
+p3 <- ggplot(aes(x=like., y=instrumentalness), data = songs) + geom_boxplot() + ylab("Instrumentalness") + xlab("Preferred?")
 
+grid.arrange(p1, p2, p3, ncol = 3)
 ```
 
 ### Description One
-
+The plot above depicts the three song features that are most dissimilar between songs I prefer and songs I do not prefer. The box plots also show the wide range of values as seen by the many outliers. 
 
 ### Plot Two
 ```{r echo=FALSE, Plot_Two}
-
+ggplot(aes(x=loudness, y=energy), data = subset(songs, songs$loudness < quantile(songs$loudness, .99) & songs$loudness > quantile(songs$loudness, .01))) + geom_point(aes(color = like.), alpha = 1/2) + ggtitle("Relationship Between Loudness and Energy") + geom_smooth() + ylab("Energy") + xlab("Loudness (dB)") + labs(color = "Preferred?")
 ```
 
 ### Description Two
-
+As the data was explored, it was found that energy and loudness have a positive correlation, as shown in the plot above. Furthermore, preferred songs tend to have slightly less energy and loudness than songs which are not preferred. 
 
 ### Plot Three
 ```{r echo=FALSE, Plot_Three}
-
+fancyRpartPlot(fit)
 ```
 
 ### Description Three
-
+Plot Three shows a visual representation of the decision tree model that was fitted to the data. By using instrumentalness, energy, speechiness, and acoustiness of the songs, the model was able to classify with 69% accuracy which songs were preferred.
 ------
 
 # Reflection
+The data exploration showed that preferred songs tend to show more instrumentalness, lower energy, and more acousticness than songs that were not preferred. With this knowledge, the random forest model that was created was able to improve song preferrence by 50% over the base case. Future extended modeling can be done with different machine learning techniques such as boosting to extend song recommendations.
