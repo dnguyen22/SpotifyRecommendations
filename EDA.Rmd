@@ -1,6 +1,8 @@
 Spotify Analysis by Don Nguyen
 ========================================================
 
+This analysis will look at a data set pulled from Spotify API, using Python. The data contains 1000 songs which I prefer and 1000 songs from various genres that are not preferred. The Spotify allows access to song data such as "acousticness", "danceability", and "energy". More information about these features can be found on [Spotify's documentation](https://developer.spotify.com/web-api/get-audio-features/).
+
 ```{r echo=FALSE, message=FALSE, warning=FALSE, packages}
 # Load all of the packages that you end up using
 # in your analysis in this code chunk.
@@ -30,10 +32,13 @@ songs <- raw[ , !(names(raw) %in% drops)]
 ```
 
 # Univariate Plots Section
+The first task is to look at the data from a broad overview. Shown below is a summary of the features in songs that are preferred and songs that are not preferred.
+
 ```{r echo=FALSE, Univariate_Summary}
 summary(subset(songs, songs$like.=='yes'))
 summary(subset(songs, songs$like.=='no'))
 ```
+By plotting histograms of each feature, the distributions of the data can be explored. Each feature's distribution was compared between preferred songs and songs that were not preferred.
 
 ```{r echo=FALSE, Univariate_Plots}
 ggplot(aes(x=acousticness), data = songs) + geom_histogram(bins = 30, fill = '#099DD9', color = 'black') + facet_wrap(~like.) + ggtitle("Acousticness")
@@ -47,6 +52,9 @@ ggplot(aes(x=speechiness), data = songs) + geom_histogram(bins = 30, fill = '#09
 ggplot(aes(x=tempo), data = songs) + geom_histogram(bins = 30, fill = '#099DD9', color = 'black') + facet_wrap(~like.) + ggtitle("Tempo")
 ggplot(aes(x=valence), data = songs) + geom_histogram(bins = 30, fill = '#099DD9', color = 'black') + facet_wrap(~like.) + ggtitle("Valence")
 ```
+
+A similar analysis can be done by creating box plots of each variable. Box plots give a better visual comparison of the differences of means between preferred songs and songs that are not preferred.
+
 ```{r echo=FALSE, Univariate_Box_Plots}
 ggplot(aes(x=like., y=acousticness), data = songs) + geom_boxplot() + ggtitle("Acousticness")
 ggplot(aes(x=like., y=danceability), data = songs) + geom_boxplot() + ggtitle("Danceability")
@@ -59,6 +67,9 @@ ggplot(aes(x=like., y=speechiness), data = songs) + geom_boxplot() + ggtitle("Sp
 ggplot(aes(x=like., y=tempo), data = songs) + geom_boxplot() + ggtitle("Tempo")
 ggplot(aes(x=like., y=valence), data = songs) + geom_boxplot() + ggtitle("Valence")
 ```
+
+Several t-tests can be computed for the features to quantify the difference in means, assuming the data follows a normal distribution.
+
 ```{r echo=FALSE, t_Tests}
 like = subset(songs, like.=='yes')
 dislike = subset(songs, like.=='no')
@@ -73,13 +84,13 @@ t.test(like$valence, dislike$valence,alternative="two.sided",mu=0,var.equal=F,co
 # Univariate Analysis
 
 ### What is the structure of your dataset?
-The dataset consists of 2000 songs, half of which are songs I categorized as liking on Spotify, the other half categorized as not liking. The songs I do not like have been pulled from many different genres of music. Each song has 14 features that can be analyzed.
+The dataset consists of 2000 songs, half of which are songs I categorized as preferring on Spotify, the other half categorized as not preferring. The songs I do not prefer have been pulled from many different genres of music. Each song has 14 features that can be analyzed.
 
 ### What is/are the main feature(s) of interest in your dataset?
-The main feature to be investigated is the "like" column, which represents whether or not I have liked the song on Spotify.
+The main feature to be investigated is the "like." column, which represents whether or not I have classified the song preferrence on Spotify.
 
 ### What other features in the dataset do you think will help support your investigation into your feature(s) of interest?
-I will be exploring all other features of the songs as a function of "like" to find patterns in songs I do and do not enjoy.
+I will be exploring all other features of the songs as a function of "like." to find patterns in songs I do and do not enjoy. The features that stand out initally are energy and instrumentalness.
 
 ### Did you create any new variables from existing variables in the dataset?
 Currently, none of the variables have been created based off existing variables.
@@ -87,11 +98,13 @@ Currently, none of the variables have been created based off existing variables.
 ### Of the features you investigated, were there any unusual distributions? Did you perform any operations on the data to tidy, adjust, or change the form of the data? If so, why did you do this?
 A couple data points needed to be removed prior to loading into R since they had null features. After removing the two songs, the rest of the data came tidy from Spotify. A few features were dropped due to not giving much information to analyze. 
 
-The features that stood out to me as having the most difference between songs I liked and disliked were energy, acousticness, and instrumentalness. Songs I liked tend to have lower energy, and more acousticness than songs I did not like. The songs I dislike also are clearly not instrumental, whereas songs I like have a higher probability of being instrumental.
+The features that stood out to me as having the most difference between songs I liked and disliked were energy, acousticness, and instrumentalness. Songs I prefer tend to have lower energy, and more acousticness than songs I did not prefer. The songs I do not prefer also are clearly not instrumental, whereas songs I prefer have a higher probability of being instrumental.
 
 
 # Bivariate Plots Section
-```{r echo=FALSE, Bivariate_Plots}
+Scatter plots are created to find and understand relationships between the features.
+
+```{r echo=FALSE, warning=FALSE, message=FALSE, Bivariate_Plots}
 ggplot(aes(x=loudness, y=energy), data = subset(songs, songs$loudness < quantile(songs$loudness, .99) & songs$loudness > quantile(songs$loudness, .01))) + geom_point() + ggtitle("Relationship Between Loudness and Energy") + geom_smooth() 
 ggplot(aes(x=loudness, y=valence), data = songs) + geom_point() + ggtitle("Relationship Between Loudness and Valence")
 ggplot(aes(x=valence, y=energy), data = songs) + geom_point() + ggtitle("Relationship Between Happy Songs and Song Energy Level")
@@ -101,6 +114,9 @@ ggplot(aes(x=instrumentalness, y=danceability), data = songs) + geom_point() + g
 ggplot(aes(x=tempo, y = danceability), data = songs) + geom_point() + ggtitle("Tempo vs. Danceability")
 ggplot(aes(x=acousticness, y=liveness), data = songs) + geom_point() + ggtitle("Relationship Between Acousticness and Probaiblity of Liveness")
 ```
+
+The Pearson's correlation can be used to quantify trends between features.
+
 ```{r echo=FALSE, Bivariate_Correlations}
 with(songs, cor.test(loudness, energy))
 with(songs, cor.test(valence, energy))
@@ -116,10 +132,10 @@ There is a clear positive linear relationship between loudness and energy. There
 Loudness and energy has a strong, positive linear relationship. Energy may be based off of loudness.
 
 
-
 # Multivariate Plots Section
+Plots similar to those in the bivariate section can be filtered by song preferrence to visualize any differences.
 
-```{r echo=FALSE, Multivariate_Plots}
+```{r echo=FALSE, message=FALSE, warning=FALSE, Multivariate_Plots}
 ggplot(aes(x=loudness, y=energy), data = subset(songs, songs$loudness < quantile(songs$loudness, .99) & songs$loudness > quantile(songs$loudness, .01))) + geom_point(aes(color = like.), alpha = 1/2) + ggtitle("Relationship Between Loudness and Energy") 
 ggplot(aes(x=loudness, y=valence), data = songs) + geom_point(aes(color = like.), alpha = 1/2) + ggtitle("Relationship Between Loudness and Valence")
 ggplot(aes(x=valence, y=energy), data = songs) + geom_point(aes(color = like.), alpha = 1/2) + ggtitle("Relationship Between Happy Songs and Song Energy Level")
@@ -129,6 +145,9 @@ ggplot(aes(x=instrumentalness, y=danceability), data = songs) + geom_point(aes(c
 ggplot(aes(x=tempo, y = danceability), data = songs) + geom_point(aes(color = like.), alpha = 1/2) + ggtitle("Tempo vs. Danceability")
 ggplot(aes(x=acousticness, y=liveness), data = songs) + geom_point(aes(color = like.), alpha = 1/2) + ggtitle("Relationship Between Acousticness and Probaiblity of Liveness")
 ```
+
+To model the data, a decision tree can be used as a first pass.
+
 ```{r echo=FALSE, Model_Decision_Tree}
 
 ## 80% of the sample size
@@ -191,7 +210,7 @@ grid.arrange(p1, p2, p3, ncol = 3)
 The plot above depicts the three song features that are most dissimilar between songs I prefer and songs I do not prefer. The box plots also show the wide range of values as seen by the many outliers. 
 
 ### Plot Two
-```{r echo=FALSE, Plot_Two}
+```{r echo=FALSE, warning=FALSE, message=FALSE, Plot_Two}
 ggplot(aes(x=loudness, y=energy), data = subset(songs, songs$loudness < quantile(songs$loudness, .99) & songs$loudness > quantile(songs$loudness, .01))) + geom_point(aes(color = like.), alpha = 1/2) + ggtitle("Relationship Between Loudness and Energy") + geom_smooth() + ylab("Energy") + xlab("Loudness (dB)") + labs(color = "Preferred?")
 ```
 
@@ -205,6 +224,7 @@ fancyRpartPlot(fit)
 
 ### Description Three
 Plot Three shows a visual representation of the decision tree model that was fitted to the data. By using instrumentalness, energy, speechiness, and acoustiness of the songs, the model was able to classify with 69% accuracy which songs were preferred.
+
 ------
 
 # Reflection
